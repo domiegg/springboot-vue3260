@@ -1,0 +1,108 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.dao.ShujuDao">
+
+    <!-- 通用查询结果列 -->
+    <sql id="Base_Column_List">
+        a.id as id
+        ,a.yonghu_id as yonghuId
+        ,a.shuju_name as shujuName
+        ,a.shuju_uuid_number as shujuUuidNumber
+        ,a.shuju_photo as shujuPhoto
+        ,a.shuju_types as shujuTypes
+        ,a.shuju_time as shujuTime
+        ,a.shuju_content as shujuContent
+        ,a.shuju_delete as shujuDelete
+        ,a.insert_time as insertTime
+        ,a.create_time as createTime
+    </sql>
+    <select id="selectListView" parameterType="map" resultType="com.entity.view.ShujuView" >
+        SELECT
+        <include refid="Base_Column_List" />
+        <!-- 级联表的字段 -->
+        ,yonghu.yonghu_uuid_number as yonghuUuidNumber
+        ,yonghu.yonghu_name as yonghuName
+        ,yonghu.yonghu_phone as yonghuPhone
+        ,yonghu.yonghu_id_number as yonghuIdNumber
+        ,yonghu.yonghu_photo as yonghuPhoto
+        ,yonghu.yonghu_email as yonghuEmail
+
+        FROM shuju  a
+        left JOIN yonghu yonghu ON a.yonghu_id = yonghu.id
+
+        <where>
+            <if test="params.ids != null">
+                and a.id in
+                <foreach item="item" index="index" collection="params.ids" open="(" separator="," close=")">
+                #{item}
+                </foreach>
+            </if>
+            <if test="params.yonghuId != null and params.yonghuId != ''">
+                and (
+                    a.yonghu_id = #{params.yonghuId}
+                )
+            </if>
+            <if test=" params.shujuName != '' and params.shujuName != null and params.shujuName != 'null' ">
+                and a.shuju_name like CONCAT('%',#{params.shujuName},'%')
+            </if>
+            <if test=" params.shujuUuidNumber != '' and params.shujuUuidNumber != null and params.shujuUuidNumber != 'null' ">
+                and a.shuju_uuid_number like CONCAT('%',#{params.shujuUuidNumber},'%')
+            </if>
+            <if test="params.shujuTypes != null and params.shujuTypes != ''">
+                and a.shuju_types = #{params.shujuTypes}
+            </if>
+            <if test=" params.shujuTimeStart != '' and params.shujuTimeStart != null ">
+                <![CDATA[  and UNIX_TIMESTAMP(a.shuju_time) >= UNIX_TIMESTAMP(#{params.shujuTimeStart}) ]]>
+            </if>
+            <if test=" params.shujuTimeEnd != '' and params.shujuTimeEnd != null ">
+                <![CDATA[  and UNIX_TIMESTAMP(a.shuju_time) <= UNIX_TIMESTAMP(#{params.shujuTimeEnd}) ]]>
+            </if>
+            <if test="params.shujuTime != null and params.shujuTime != ''">
+                and a.shuju_time = #{params.shujuTime}
+            </if>
+            <if test=" params.shujuContent != '' and params.shujuContent != null and params.shujuContent != 'null' ">
+                and a.shuju_content like CONCAT('%',#{params.shujuContent},'%')
+            </if>
+            <if test="params.shujuDeleteStart != null and params.shujuDeleteStart != ''">
+                <![CDATA[  and a.shuju_delete >= #{params.shujuDeleteStart}   ]]>
+            </if>
+            <if test="params.shujuDeleteEnd != null and params.shujuDeleteEnd != ''">
+                <![CDATA[  and a.shuju_delete <= #{params.shujuDeleteEnd}   ]]>
+            </if>
+             <if test="params.shujuDelete != null and params.shujuDelete != ''">
+                and a.shuju_delete = #{params.shujuDelete}
+             </if>
+            <if test=" params.insertTimeStart != '' and params.insertTimeStart != null ">
+                <![CDATA[  and UNIX_TIMESTAMP(a.insert_time) >= UNIX_TIMESTAMP(#{params.insertTimeStart}) ]]>
+            </if>
+            <if test=" params.insertTimeEnd != '' and params.insertTimeEnd != null ">
+                <![CDATA[  and UNIX_TIMESTAMP(a.insert_time) <= UNIX_TIMESTAMP(#{params.insertTimeEnd}) ]]>
+            </if>
+            <if test="params.insertTime != null and params.insertTime != ''">
+                and a.insert_time = #{params.insertTime}
+            </if>
+
+                <!-- 判断用户的id不为空 -->
+            <if test=" params.yonghuIdNotNull != '' and params.yonghuIdNotNull != null and params.yonghuIdNotNull != 'null' ">
+                and a.yonghu_id IS NOT NULL
+            </if>
+            <if test=" params.yonghuUuidNumber != '' and params.yonghuUuidNumber != null and params.yonghuUuidNumber != 'null' ">
+                and yonghu.yonghu_uuid_number like CONCAT('%',#{params.yonghuUuidNumber},'%')
+            </if>
+            <if test=" params.yonghuName != '' and params.yonghuName != null and params.yonghuName != 'null' ">
+                and yonghu.yonghu_name like CONCAT('%',#{params.yonghuName},'%')
+            </if>
+            <if test=" params.yonghuPhone != '' and params.yonghuPhone != null and params.yonghuPhone != 'null' ">
+                and yonghu.yonghu_phone like CONCAT('%',#{params.yonghuPhone},'%')
+            </if>
+            <if test=" params.yonghuIdNumber != '' and params.yonghuIdNumber != null and params.yonghuIdNumber != 'null' ">
+                and yonghu.yonghu_id_number like CONCAT('%',#{params.yonghuIdNumber},'%')
+            </if>
+            <if test=" params.yonghuEmail != '' and params.yonghuEmail != null and params.yonghuEmail != 'null' ">
+                and yonghu.yonghu_email like CONCAT('%',#{params.yonghuEmail},'%')
+            </if>
+        </where>
+        order by a.${params.sort} ${params.order}
+    </select>
+
+</mapper>
